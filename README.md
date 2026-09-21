@@ -1,4 +1,4 @@
-# MeMTrain
+# MemTrain
 
 采用两阶段训练流程：
 
