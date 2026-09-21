@@ -1,6 +1,6 @@
 # MeMTrain
 
-基于 [MemAgent](https://github.com/bytedance/MemAgent)（verl RL 框架）的记忆训练项目，采用两阶段训练流程：
+采用两阶段训练流程：
 
 1. **memtrain**：掩码实体预测预训练（`recurrent.enable=memory`，开启 memory recall 辅助损失），训练模型"记忆"长文档的能力；
 2. **memagent / mem1**：以 memtrain 的 checkpoint 为初始模型，分别进行两条 RL（GRPO）训练：
@@ -11,7 +11,6 @@
 
 ```bash
 pip install -r requirements.txt
-# 训练基于 Ray 集群，需先启动：ray start --head
 ```
 
 ## 数据处理
@@ -29,7 +28,7 @@ torchrun --standalone --nnodes=1 --nproc_per_node=8 \
     --model_name BAAI/bge-base-en-v1.5
 
 # 3) 生成掩码预训练数据：150 篇文档拼成长上下文，掩码锚文档中的实体，
-#    并混入 top-30 语义相近文档作为干扰
+#    并混入 top-30 语义相近文档
 python data/preprocess_mask_dataset_semantic.py \
     --input_file filtered.jsonl --index_dir embedding_index \
     --output_file taskutils/memory_data/mask_pretrain_150docs_top30.parquet \
@@ -42,7 +41,6 @@ python data/preprocess_mask_dataset_semantic.py \
 cd taskutils/memory_data
 bash download_qa_dataset.sh   # 下载 SQuAD/HotpotQA
 python processing.py          # 拼接多文档长上下文 + 问题，输出 parquet
-# dataset_process.py 为其单进程版本
 ```
 
 ### 3. mem1 搜索数据（`nq_hotpotqa_train_multi_2/`）
@@ -91,9 +89,6 @@ bash experiements/mem1/run_memtrain_then_mem1_qwen2.5-7B-ins_dist.sh
 ## 评测
 
 ```bash
-# HotpotQA 长文档评测 / RULER 系列评测
+# HotpotQA 长文档评测
 python taskutils/memory_eval/ruler_hqa.py
-python taskutils/memory_eval/ruler_general.py
 ```
-
-训练数据 parquet 可用 `taskutils/memory_data/convert_to_eval.py` 转为评测用 JSON。
