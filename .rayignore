@@ -1,0 +1,9 @@
+# Large output/data directories
+results/
+rollouts/
+outputs/
+logs/
+tensorboard_log/
+inference/
+taskutils/memory_eval/logs
+plot/
